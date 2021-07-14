@@ -24,6 +24,3 @@ const immediate2 = setImmediate(() => {
 });
 
 clearImmediate(immediate2);
-
-console.log(__filename);
-console.log(__dirname);
