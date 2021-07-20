@@ -64,7 +64,7 @@ const upload = multer({
 });
 app.get("/upload", (req, res) => {
   // res.sendFile(path.join(__dirname, "multipart.html"));
-  res.render('multipart');
+  res.render("multipart");
 });
 app.post(
   "/upload",
@@ -113,9 +113,9 @@ app.get(
 
 app.use((err, req, res, next) => {
   res.locals.message = err.message;
-  res.locals.error = process.env.NODE_ENV !== 'production' ? err: {};
+  res.locals.error = process.env.NODE_ENV !== "production" ? err : {};
   res.status(err.status || 500);
-  res.render('error')
+  res.render("error");
 });
 
 app.listen(app.get("port"), () => {
