@@ -24,6 +24,7 @@
           </div>
           <input id="my-id" type="hidden" value="{{user.id}}" />
           <a id="my-profile" href="/profile" class="btn">내 프로필</a>
+          <a id="update-profile" class="btn">수정</a>
           <a id="logout" href="/auth/logout" class="btn">로그아웃</a>
           {% else %}
           <form id="login-form" action="/auth/login" method="post">
@@ -55,6 +56,21 @@
           alert(new URL(location.href).searchParams.get("loginError"));
         }
       };
+      const edit = document.querySelector("#update-profile");
+      edit.addEventListener("click", async () => {
+        const newNick = prompt("바꿀 닉네임을 입력하세요");
+        if (!newNick) {
+          return alert("내용을 반드시 입력하셔야 합니다.");
+        }
+        await axios
+          .patch("/user/update", { nick: newNick })
+          .then(() => {
+            location.reload();
+          })
+          .catch((err) => {
+            console.error(err);
+          });
+      });
     </script>
     {% block script %} {% endblock %}
   </body>

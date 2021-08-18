@@ -33,6 +33,48 @@ router.post("/img", isLoggedIn, upload.single("img"), (req, res) => {
   res.json({ url: `/img/${req.file.filename}` });
 });
 
+router
+  .route("/:id/like")
+  .post(isLoggedIn, async (req, res, next) => {
+  try {
+    const post = await Post.findOne({ where: { id: req.params.id } })
+    if (post) {
+      console.log(post.add);
+      await post.addLiker(req.user.id); 
+      res.send("success");
+    } else {
+      res.status(404).send("no user");
+    }
+  } catch (err) {
+    console.error(err);
+    next(err);
+  }
+})
+  .delete(isLoggedIn, async (req, res, next) => {
+  try {
+    const post = await Post.findOne({ where: { id: req.params.id } });
+    if (post) {
+      await post.removeLiker(req.user.id);
+      res.send("success");
+    } else {
+      res.status(404).send("no user");
+    }
+  } catch (err) {
+    console.error(err);
+    next(err);
+  }
+});
+
+router.delete("/:id/remove", isLoggedIn, async (req, res, next) => {
+  try {
+    const result = await Post.destroy({ where: { id: req.params.id } });
+    res.json(result);
+  } catch (err) {
+    console.error(err);
+    next(err);
+  }
+});
+
 const upload2 = multer();
 router.post("/", isLoggedIn, upload2.none(), async (req, res, next) => {
   try {

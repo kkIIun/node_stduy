@@ -16,12 +16,12 @@ module.exports = () => {
       include: [
         {
           model: User,
-          attributes: ["nick", "id"],
+          attributes: ["id"],
           as: "Followers",
         },
         {
           model: User,
-          attributes: ["nick", "id"],
+          attributes: ["id"],
           as: "Followings",
         },
       ],

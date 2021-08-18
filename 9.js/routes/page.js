@@ -11,7 +11,7 @@ router.use((req, res, next) => {
   res.locals.followerIdList = req.user
     ? req.user.Followings.map((f) => f.id)
     : [];
-  console.log(req.user);
+  // console.log(req.user);
   next();
 });
 
@@ -26,12 +26,25 @@ router.get("/join", isNotLoggedIn, (req, res) => {
 router.get("/", async (req, res, next) => {
   try {
     const posts = await Post.findAll({
-      include: {
-        model: User,
-        attributes: ["id", "nick"],
-      },
+      include: [
+        {
+          model: User,
+          attributes: ["id", "nick"],
+        },
+        {
+          model: User,
+          attributes: ["id", "nick"],
+          as: "Liker",
+        },
+      ],
       order: [["createdAt", "DESC"]],
     });
+    
+    posts.map((post) => {
+      post.likeCouts = post.Liker.length;
+      post.likeState = req.user ? post.Liker.find(v => v.id === req.user.id) : 'undefined';
+    });
+    
     res.render("main", { title: "NodeBird", twits: posts });
   } catch (err) {
     console.error(err);
