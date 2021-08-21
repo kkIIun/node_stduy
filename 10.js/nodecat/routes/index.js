@@ -2,7 +2,7 @@ const express = require('express');
 const axios = require('axios');
 
 const router = express.Router();
-const URL = 'http://localhost:8001/v1';
+const URL = 'http://localhost:8001/v2';
 axios.defaults.headers.origin = 'http://localhost:4000';
 const request = async (req, api) => {
   try {
@@ -20,9 +20,13 @@ const request = async (req, api) => {
       delete req.session.jwt;
       return request(req, api);
     }
-    return error.response;
+    return err.response;
   }
 };
+
+router.get('/', (req, res) => {
+    res.render('main', { key: process.env.CLIENT_SECRET });
+});
 
 router.get("/mypost", async (req, res, next) => {
   try {
