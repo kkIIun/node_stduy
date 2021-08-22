@@ -16,13 +16,17 @@ module.exports = class Domain extends Sequelize.Model {
           type: Sequelize.UUID,
           allowNull: false,
         },
+        frontSecret: {
+          type: Sequelize.UUID,
+          allowNull: false,
+        },
       },
       {
         sequelize,
         timestamps: true,
         modelName: "Domain",
         tableName: "domains",
-        paranoid: true, 
+        paranoid: true,
       }
     );
   }

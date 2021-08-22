@@ -7,6 +7,7 @@ const nunjucks = require("nunjucks");
 const dotenv = require("dotenv");
 const passport = require("passport");
 const { sequelize } = require("./models");
+const { swaggerUi, specs } = require("./modules/swagger");
 
 dotenv.config();
 const v1 = require('./routes/v1');
@@ -58,6 +59,7 @@ app.use('/v1', v1);
 app.use("/v2", v2);
 app.use("/auth", authRouter);
 app.use("/", indexRouter);
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(specs));
 
 app.use((req, res, next) => {
   const error = new Error(`${req.method} ${req.url} 라우터가 없습니다.`);

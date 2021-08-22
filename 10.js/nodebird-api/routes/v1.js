@@ -26,7 +26,8 @@ router.post('/token', async (req, res, next) => {
         }
         const token = jwt.sign({
             id: domain.User.id,
-            nick: domain.User.nick
+            nick: domain.User.nick,
+            type: domain.type
         }, process.env.JWT_SECRET, {
             expiresIn: '1m',
             issuer: 'nodebird',

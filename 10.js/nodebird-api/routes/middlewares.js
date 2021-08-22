@@ -43,10 +43,23 @@ exports.apiLimiter = new RateLimit({
   handler(req, res) {
     res.status(this.statusCode).json({
       code: this.statusCode, // 기본값429
-      message: '1분만에 한 번만 요청할 수 있습니다.',
+      message: "1분만에 1 번만 요청할 수 있습니다.",
     });
   },
 });
+
+exports.premiuMapiLimiter = new RateLimit({
+  windowMs: 60 * 1000, // 1분
+  max: 10,
+  delayMs: 0,
+  handler(req, res) {
+    res.status(this.statusCode).json({
+      code: this.statusCode, // 기본값429
+      message: "1분만에 10 번만 요청할 수 있습니다.",
+    });
+  },
+});
+
 
 exports.deprecated = (req, res) => {
   res.status(410).json({

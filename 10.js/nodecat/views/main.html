@@ -10,7 +10,7 @@
     <script>
       axios
         .post("http://localhost:8001/v2/token", {
-          clientSecret: "{{key}}",
+          frontSecret: "{{key}}",
         })
         .then((res) => {
           document.querySelector("#result").textContent = JSON.stringify(

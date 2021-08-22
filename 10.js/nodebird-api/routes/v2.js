@@ -3,28 +3,41 @@ const jwt = require("jsonwebtoken");
 const cors = require('cors');
 const url = require('url');
 
-const { verifyToken, apiLimiter } = require("./middlewares");
+const { verifyToken, apiLimiter, premiuMapiLimiter } = require("./middlewares");
 const { Domain, User, Post, Hashtag } = require("../models");
 
 const router = express.Router();
 
 router.use(async (req, res, next) => {
-    const domain = await Domain.findOne({ where: { host: url.parse(req.get('origin')).host }, });
-    if (domain) {
-        cors({
-            origin: req.get('origin'),
-            credentials: true,
-        })(req, res, next);
-    } else {
-        next();
-    }
+  const domain = await Domain.findOne({ where: { host: url.parse(req.get('origin')).host }, });
+  if (domain) {
+    cors({
+      origin: req.get("origin"),
+      credentials: true,
+    })(req, res, next);
+  } else {
+      next();
+  }
 });
 
-router.post("/token", apiLimiter, async (req, res, next) => {
-  const { clientSecret } = req.body;
+router.use(async (req, res, next) => {
+  const domain = await Domain.findOne({
+    where: { host: url.parse(req.get("origin")).host },
+  });
+  if (domain) {
+    if (domain.type === 'premium') premiuMapiLimiter(req, res, next);
+    if (domain.type === "free") apiLimiter(req, res, next);
+  } else {
+    next();
+  }
+});
+
+router.post("/token", async (req, res, next) => {
+  
+  const { frontSecret } = req.body;
   try {
     const domain = await Domain.findOne({
-      where: { clientSecret },
+      where: { frontSecret },
       include: {
         model: User,
         attributes: ["nick", "id"],
@@ -40,6 +53,7 @@ router.post("/token", apiLimiter, async (req, res, next) => {
       {
         id: domain.User.id,
         nick: domain.User.nick,
+        type: domain.type,
       },
       process.env.JWT_SECRET,
       {
@@ -61,11 +75,11 @@ router.post("/token", apiLimiter, async (req, res, next) => {
   }
 });
 
-router.get("/test", verifyToken, apiLimiter, (req, res) => {
+router.get("/test", verifyToken, (req, res) => {
   res.json(req.decoded);
 });
 
-router.get("/posts/my", verifyToken, apiLimiter, (req, res) => {
+router.get("/posts/my", verifyToken, (req, res) => {
   Post.findAll({ where: { userId: req.decoded.id } })
     .then((posts) => {
       console.log(posts);
@@ -83,7 +97,7 @@ router.get("/posts/my", verifyToken, apiLimiter, (req, res) => {
     });
 });
 
-router.get("/posts/hashtag/:title", verifyToken, apiLimiter, async (req, res, next) => {
+router.get("/posts/hashtag/:title", verifyToken, async (req, res, next) => {
   try {
     const hashtag = await Hashtag.findOne({
       where: { title: req.params.title },
@@ -106,6 +120,31 @@ router.get("/posts/hashtag/:title", verifyToken, apiLimiter, async (req, res, ne
       message: "서버 에러",
     });
   }
+});
+
+router.get("/follow/my", verifyToken, (req, res) => {
+  User.findOne({
+    where: { id: req.decoded.id },
+    include: [
+      { model: User, attributes: ["nick", "id"], as: "Followers" },
+      { model: User, attributes: ["nick", "id"], as: "Followings" },
+    ],
+  })
+    .then((user) => {
+      
+      res.json({
+        code: 200,
+        followings: user.Followers,
+        followers: user.Followings,
+      });
+    })
+    .catch((err) => {
+      console.error(err);
+      return res.status(500).json({
+        code: 500,
+        message: "서버에러",
+      });
+    });
 });
 
 module.exports = router;

@@ -8,7 +8,7 @@ const request = async (req, api) => {
   try {
     if (!req.session.jwt) {
       const tokenResult = await axios.post(`${URL}/token`, {
-        clientSecret: process.env.CLIENT_SECRET,
+        frontSecret: process.env.FRONT_SECRET,
       });
         req.session.jwt = tokenResult.data.token;
     }
@@ -25,7 +25,7 @@ const request = async (req, api) => {
 };
 
 router.get('/', (req, res) => {
-    res.render('main', { key: process.env.CLIENT_SECRET });
+    res.render("main", { key: process.env.FRONT_SECRET });
 });
 
 router.get("/mypost", async (req, res, next) => {
@@ -34,6 +34,16 @@ router.get("/mypost", async (req, res, next) => {
       req,
       '/posts/my'
     );
+    res.json(result.data);
+  } catch (err) {
+    console.error(err);
+    next(err);
+  }
+});
+
+router.get("/myfollow", async (req, res, next) => {
+  try {
+    const result = await request(req, "/follow/my");
     res.json(result.data);
   } catch (err) {
     console.error(err);
