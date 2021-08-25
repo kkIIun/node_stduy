@@ -3,8 +3,8 @@
     "target": "http://localhost:8000",
     "phases": [
       {
-        "duration": 60,
-        "arrivalRate": 30
+        "duration": 1,
+        "arrivalRate": 1
       }
     ]
   },
@@ -20,14 +20,14 @@
           "post": {
             "url": "/auth/login",
             "json": {
-              "email": "none",
-              "password": "none"
+              "email": "rlwjd4177@likelion.org",
+              "password": "somuch0503"
             }
           }
         },
         {
           "get": {
-            "url": "/hashtag?hashtag=nodebird"
+            "url": "/auth/logout"
           }
         }
       ]

@@ -11,7 +11,6 @@ router.use((req, res, next) => {
   res.locals.followerIdList = req.user
     ? req.user.Followings.map((f) => f.id)
     : [];
-  // console.log(req.user);
   next();
 });
 
@@ -39,12 +38,14 @@ router.get("/", async (req, res, next) => {
       ],
       order: [["createdAt", "DESC"]],
     });
-    
+
     posts.map((post) => {
       post.likeCouts = post.Liker.length;
-      post.likeState = req.user ? post.Liker.find(v => v.id === req.user.id) : 'undefined';
+      post.likeState = req.user
+        ? post.Liker.find((v) => v.id === req.user.id)
+        : "undefined";
     });
-    
+
     res.render("main", { title: "NodeBird", twits: posts });
   } catch (err) {
     console.error(err);

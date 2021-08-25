@@ -29,41 +29,40 @@ const upload = multer({
 });
 
 router.post("/img", isLoggedIn, upload.single("img"), (req, res) => {
-  console.log(2791732973913789, req.file);
   res.json({ url: `/img/${req.file.filename}` });
 });
 
 router
   .route("/:id/like")
   .post(isLoggedIn, async (req, res, next) => {
-  try {
-    const post = await Post.findOne({ where: { id: req.params.id } })
-    if (post) {
-      console.log(post.add);
-      await post.addLiker(req.user.id); 
-      res.send("success");
-    } else {
-      res.status(404).send("no user");
+    try {
+      const post = await Post.findOne({ where: { id: req.params.id } });
+      if (post) {
+        console.log(post.add);
+        await post.addLiker(req.user.id);
+        res.send("success");
+      } else {
+        res.status(404).send("no user");
+      }
+    } catch (err) {
+      console.error(err);
+      next(err);
     }
-  } catch (err) {
-    console.error(err);
-    next(err);
-  }
-})
+  })
   .delete(isLoggedIn, async (req, res, next) => {
-  try {
-    const post = await Post.findOne({ where: { id: req.params.id } });
-    if (post) {
-      await post.removeLiker(req.user.id);
-      res.send("success");
-    } else {
-      res.status(404).send("no user");
+    try {
+      const post = await Post.findOne({ where: { id: req.params.id } });
+      if (post) {
+        await post.removeLiker(req.user.id);
+        res.send("success");
+      } else {
+        res.status(404).send("no user");
+      }
+    } catch (err) {
+      console.error(err);
+      next(err);
     }
-  } catch (err) {
-    console.error(err);
-    next(err);
-  }
-});
+  });
 
 router.delete("/:id/remove", isLoggedIn, async (req, res, next) => {
   try {

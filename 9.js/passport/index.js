@@ -16,7 +16,7 @@ module.exports = () => {
     // 매 요청시 실행
     const user = users[id];
     const date = expiredate[id];
-    if(!user || !date || date < Date.now())
+    if (!user || !date || date < Date.now())
       User.findOne({
         where: { id },
         include: [
@@ -35,11 +35,11 @@ module.exports = () => {
         .then((user) => {
           users[id] = user;
           expiredate[id] = Date.now() + 5000;
-          done(null, user)
+          done(null, user);
         })
         .catch((err) => done(err));
     else {
-      done(null,user)
+      done(null, user);
     }
   });
 

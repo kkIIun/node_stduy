@@ -2,10 +2,6 @@ const request = require("supertest");
 const { sequelize } = require("../models");
 const app = require("../app");
 
-beforeAll(async () => {
-  await sequelize.sync(); // 데이터베이스에 테이블 생성
-});
-
 describe("POST /join", () => {
   test("로그인 안 했으면 가입", (done) => {
     request(app)
