@@ -23,6 +23,7 @@ router.get("/join", isNotLoggedIn, (req, res) => {
 });
 
 router.get("/", async (req, res, next) => {
+  console.log("id", req.sessionID);
   try {
     const posts = await Post.findAll({
       include: [

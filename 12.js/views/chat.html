@@ -18,7 +18,7 @@
       <div>{{chat.chat}}</div>
     </div>
     {% else %}
-    <div class="other" style="color: {{chat.user}}">
+    <div class="other" style="color: '{{chat.user}}'">
       <div>{{chat.user}}</div>
       {% if chat.gif %}
       <img src="/gif/{{chat.gif}}" />

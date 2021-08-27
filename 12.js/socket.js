@@ -1,10 +1,15 @@
 const SocketIO = require("socket.io");
+const axios = require("axios");
 
-module.exports = (server) => {
+module.exports = (server, app, sessionMeddleware) => {
   const io = SocketIO(server, { path: "/socket.io" });
   app.set("io", io);
   const room = io.of("/room");
   const chat = io.of("/chat");
+
+  io.use((socket, next) => {
+    sessionMeddleware(socket.request, socket.request.res, next);
+  });
 
   room.on("connection", (socket) => {
     console.log("room 네임스페이스에 접속");
@@ -17,6 +22,7 @@ module.exports = (server) => {
     // 웹 소켓 연결시
     console.log("chat 네임스페이스에 접속");
     const req = socket.request;
+    console.log(req.session.color);
     const {
       headers: { referer },
     } = req;
@@ -24,10 +30,30 @@ module.exports = (server) => {
       .split("/")
       [referer.split("/").length - 1].replace(/\?.+/, "");
     socket.join(roomId);
-
+    socket.to(roomId).emit("join", {
+      user: "system",
+      chat: `${req.session.color}님이 입장하셨습니다.`,
+    });
     socket.on("disconnect", () => {
       console.log("chat 네임스페이스 접속 해제");
       socket.leave(roomId);
+      const currentRoom = socket.adapter.rooms[roomid];
+      const userCount = currentRoom ? currentRoom.length : 0;
+      if (userCount === 0) {
+        axios
+          .delete(`http://localhost:8005/room/${roomId}`)
+          .then(() => {
+            console.log("방 제거 요청 성공");
+          })
+          .catch((error) => {
+            console.error(error);
+          });
+      } else {
+        socket.to(roomId).emit("exit", {
+          user: "system",
+          chat: `${req.session.color}님이 퇴장하셨습니다.`,
+        });
+      }
     });
   });
 };

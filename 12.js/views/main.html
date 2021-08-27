@@ -17,7 +17,7 @@
         <td>{{room.title}}</td>
         <td>{{'비밀방' if room.password else '공개방'}}</td>
         <td>{{room.max}}</td>
-        <td style="color: {{room.owner}}">{{room.owner}}</td>
+        <td style="color: '{{room.owner}}'">{{room.owner}}</td>
         <td>
           <button
             data-password="{{'true' if room.password else 'false'}}"
@@ -41,7 +41,7 @@
     path: "/socket.io",
   });
 
-  socket.on("newRoom", function (data) {
+  socket.on("newRoom", (data) => {
     // 새 방 이벤트 시 새 방 생성
     const tr = document.createElement("tr");
     let td = document.createElement("td");

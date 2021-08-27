@@ -13,7 +13,6 @@ const connect = () => {
     {
       dbName: "gifchat",
       useNewUrlParser: true,
-      useCreateIndex: true,
     },
     (error) => {
       if (error) {
@@ -28,7 +27,7 @@ mongoose.connection.on("error", (error) => {
   console.error("몽고디비 연결 에러", error);
 });
 mongoose.connection.on("disconnected", () => {
-  console.error("몽고디비 연결이 끊어졌씁니다. 연결을 재시도합니다");
+  console.error("몽고디비 연결이 끊어졌씁니다. 연결을 재시도합니다", MONGO_URL);
   connect();
 });
 
