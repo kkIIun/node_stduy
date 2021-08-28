@@ -1,15 +1,17 @@
 const SocketIO = require("socket.io");
 const axios = require("axios");
+const cookieParser = require("cookie-parser");
+const cookie = require("cookie-signature");
 
-module.exports = (server, app, sessionMeddleware) => {
+module.exports = (server, app, sessionMiddleware) => {
   const io = SocketIO(server, { path: "/socket.io" });
   app.set("io", io);
   const room = io.of("/room");
   const chat = io.of("/chat");
-
-  io.use((socket, next) => {
-    sessionMeddleware(socket.request, socket.request.res, next);
-  });
+  const wrap = (middleware) => (socket, next) =>
+    middleware(socket.request, {}, next);
+  chat.use(wrap(cookieParser(process.env.COOKIE_SECRET)));
+  chat.use(wrap(sessionMiddleware));
 
   room.on("connection", (socket) => {
     console.log("room 네임스페이스에 접속");
@@ -22,7 +24,6 @@ module.exports = (server, app, sessionMeddleware) => {
     // 웹 소켓 연결시
     console.log("chat 네임스페이스에 접속");
     const req = socket.request;
-    console.log(req.session.color);
     const {
       headers: { referer },
     } = req;
@@ -37,11 +38,17 @@ module.exports = (server, app, sessionMeddleware) => {
     socket.on("disconnect", () => {
       console.log("chat 네임스페이스 접속 해제");
       socket.leave(roomId);
-      const currentRoom = socket.adapter.rooms[roomid];
-      const userCount = currentRoom ? currentRoom.length : 0;
+      const currentRoom = io.of("/chat").adapter.rooms.get(roomId);
+      const userCount = currentRoom ? currentRoom.size : 0;
       if (userCount === 0) {
+        const signedCookie = req.signedCookies["connect.sid"];
+        const connectSID = cookie.sign(signedCookie, process.env.COOKIE_SECRET);
         axios
-          .delete(`http://localhost:8005/room/${roomId}`)
+          .delete(`http://localhost:8005/room/${roomId}`, {
+            headers: {
+              Cookie: `connect.sid=s%3A${connectSID}`,
+            },
+          })
           .then(() => {
             console.log("방 제거 요청 성공");
           })
@@ -55,5 +62,8 @@ module.exports = (server, app, sessionMeddleware) => {
         });
       }
     });
+    // socket.on('chat', (data) => {
+    //   socket.to(data.room).emit(data);
+    // })
   });
 };
